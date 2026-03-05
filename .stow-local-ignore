@@ -1,0 +1,8 @@
+scripts
+\.DS_Store
+\.git
+\.gitignore
+README\.md
+.*\.bak$
+Brewfile
+\.stow-local-ignore
