@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Handle git operations including worktree creation, conventional commits, branch naming, PR creation, PR reviews, and PR comment addressing. Use when the user asks to create a branch, commit changes, create a pull request, review a PR, address PR comments, or create a git worktree.
+description: Create git worktrees, name branches, write and validate conventional commit messages, create and review pull requests (PRs), and address PR review comments. Use for requests about branches, commit messages, pull requests, PRs, reviews, review comments, or worktrees.
 ---
 
 # Git Workflow
@@ -9,18 +9,18 @@ description: Handle git operations including worktree creation, conventional com
 
 Scripts in `scripts/` handle complex git/gh operations that are error-prone to reproduce inline. Execute them directly with `python` — do not regenerate their logic inline. All scripts are stdlib-only Python.
 
-Scripts are referenced as `scripts/...` relative paths. If that doesn't resolve (e.g. working from a worktree or different directory), the scripts are bundled alongside this skill file — use its parent directory to construct the absolute path.
+Scripts are referenced by relative paths under `scripts/`. If that doesn't resolve (e.g. working from a worktree or different directory), the scripts are bundled alongside this skill file. Use its parent directory to construct the absolute path.
 
 All GitHub interactions use the `gh` CLI exclusively (no MCP tools for git/GitHub operations).
 
-| Script | Purpose |
-| ------ | ------- |
-| `scripts/gather_repo_state.py` | Repo state JSON: owner, repo, branch, base, staged, commits ahead |
-| `scripts/fetch_pr_context.py <owner> <repo> <N> [--max-lines] [--max-file-lines] [--no-skip]` | PR metadata + filtered per-file diffs as JSON |
-| `scripts/fetch_threads.py <owner> <repo> <N>` | Fetch unresolved PR threads (paginated GraphQL) |
-| `scripts/submit_review.py <owner> <repo> <N> <event> <summary> [comments.json]` | Submit review with optional line comments |
-| `scripts/create_worktree.py <branch> [base]` | Create worktree in `$GIT_WORKTREE_DIR` with `<repo>-<branch-slug>` naming |
-| `scripts/validate_commit_msg.py <msg>` | Validate conventional commit + 50/72 rules |
+| Script                                                                                        | Purpose                                                                   |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `scripts/gather_repo_state.py`                                                                | Repo state JSON: owner, repo, branch, base, staged, commits ahead         |
+| `scripts/fetch_pr_context.py <owner> <repo> <N> [--max-lines] [--max-file-lines] [--no-skip]` | PR metadata + filtered per-file diffs as JSON                             |
+| `scripts/fetch_threads.py <owner> <repo> <N>`                                                 | Fetch unresolved PR threads (paginated GraphQL)                           |
+| `scripts/submit_review.py <owner> <repo> <N> <event> <summary> [comments.json]`               | Submit review with optional line comments                                 |
+| `scripts/create_worktree.py <branch> [base]`                                                  | Create worktree in `$GIT_WORKTREE_DIR` with `<repo>-<branch-slug>` naming |
+| `scripts/validate_commit_msg.py <msg>`                                                        | Validate conventional commit + 50/72 rules                                |
 
 ## Worktrees
 
@@ -43,20 +43,20 @@ Full specification in [conventions.md](conventions.md).
 
 **PR title**: Same as commit format, description lowercase after prefix
 
-| Type | Branch Prefix | Commit Prefix |
-| ---- | ------------- | ------------- |
-| Feature | `feat/` | `feat:` |
-| Bug fix | `fix/` | `fix:` |
-| Hotfix | `hotfix/` | `fix:` |
-| Release | `release/` | `chore:` |
-| Chore | `chore/` | `chore:` |
-| Docs | `docs/` | `docs:` |
-| Refactor | `refactor/` | `refactor:` |
-| Test | `test/` | `test:` |
-| CI | `ci/` | `ci:` |
-| Build | `build/` | `build:` |
-| Perf | `perf/` | `perf:` |
-| Style | `style/` | `style:` |
+| Type     | Branch Prefix | Commit Prefix |
+| -------- | ------------- | ------------- |
+| Feature  | `feat/`       | `feat:`       |
+| Bug fix  | `fix/`        | `fix:`        |
+| Hotfix   | `hotfix/`     | `fix:`        |
+| Release  | `release/`    | `chore:`      |
+| Chore    | `chore/`      | `chore:`      |
+| Docs     | `docs/`       | `docs:`       |
+| Refactor | `refactor/`   | `refactor:`   |
+| Test     | `test/`       | `test:`       |
+| CI       | `ci/`         | `ci:`         |
+| Build    | `build/`      | `build:`      |
+| Perf     | `perf/`       | `perf:`       |
+| Style    | `style/`      | `style:`      |
 
 ## Branch Creation
 
@@ -82,10 +82,10 @@ git commit -m "<type>[scope]: <description>" -m "<body explaining what and why>"
 python scripts/validate_commit_msg.py "<message>"
 ```
 
-For multi-line messages (body/footer), write to a temp file and use `--file`:
+For multi-line messages (body/footer), write to a temp file under `$TMPDIR` and use `--file`:
 
 ```bash
-python scripts/validate_commit_msg.py --file /tmp/commit-msg.txt
+python scripts/validate_commit_msg.py --file "$TMPDIR/commit-msg.txt"
 ```
 
 Returns `{"valid": true/false, "errors": [...]}`. Fix any errors before executing the commit.
