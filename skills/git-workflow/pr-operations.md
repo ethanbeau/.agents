@@ -268,7 +268,7 @@ gh api --method POST "repos/<owner>/<repo>/pulls/<number>/comments/<comment_id>/
 
 Examples:
 
-- Fixed: `"Fixed in abc1234 - switched to parameterized query"`
+- Fixed: `"Fixed in abc1234: switched to parameterized query"`
 - Not fixing: `"Intentional: this import is used by the test harness via dynamic lookup"`
 
 ### 7) Report
